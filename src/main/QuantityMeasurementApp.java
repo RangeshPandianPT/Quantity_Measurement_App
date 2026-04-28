@@ -4,12 +4,40 @@ import java.util.Objects;
 
 public class QuantityMeasurementApp {
 
-    // Feet class
-    public static class Feet {
-        private final double value;
+    // Enum for all supported units
+    public enum LengthUnit {
+        FEET(1.0),
+        INCHES(1.0 / 12.0),
+        YARDS(3.0),
+        CENTIMETERS(0.0328084);
 
-        public Feet(double value) {
+        private final double toFeet;
+
+        LengthUnit(double toFeet) {
+            this.toFeet = toFeet;
+        }
+
+        public double toFeet(double value) {
+            return value * toFeet;
+        }
+    }
+
+    // Generic Length class
+    public static class Length {
+        private final double value;
+        private final LengthUnit unit;
+
+        public Length(double value, LengthUnit unit) {
+            if (unit == null) {
+                throw new IllegalArgumentException("Unit cannot be null");
+            }
             this.value = value;
+            this.unit = unit;
+        }
+
+        // Convert to base unit (Feet)
+        private double toBase() {
+            return unit.toFeet(value);
         }
 
         @Override
@@ -18,55 +46,30 @@ public class QuantityMeasurementApp {
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
 
-            Feet other = (Feet) obj;
-            return Double.compare(this.value, other.value) == 0;
+            Length other = (Length) obj;
+            return Double.compare(this.toBase(), other.toBase()) == 0;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return Objects.hash(toBase());
         }
     }
 
-    // Inches class
-    public static class Inches {
-        private final double value;
-
-        public Inches(double value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
-
-            Inches other = (Inches) obj;
-            return Double.compare(this.value, other.value) == 0;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-    }
-
-    // Demo methods (as per UC2)
-    public static void demonstrateFeetEquality() {
-        Feet f1 = new Feet(1.0);
-        Feet f2 = new Feet(1.0);
-        System.out.println("Feet: 1.0 == 1.0 -> " + f1.equals(f2));
-    }
-
-    public static void demonstrateInchesEquality() {
-        Inches i1 = new Inches(10.0);
-        Inches i2 = new Inches(10.0);
-        System.out.println("Inches: 10.0 == 10.0 -> " + i1.equals(i2));
-    }
-
+    // Demo
     public static void main(String[] args) {
-        demonstrateFeetEquality();
-        demonstrateInchesEquality();
+
+        Length l1 = new Length(1.0, LengthUnit.FEET);
+        Length l2 = new Length(12.0, LengthUnit.INCHES);
+
+        Length l3 = new Length(1.0, LengthUnit.YARDS);
+        Length l4 = new Length(3.0, LengthUnit.FEET);
+
+        Length l5 = new Length(30.48, LengthUnit.CENTIMETERS);
+        Length l6 = new Length(1.0, LengthUnit.FEET);
+
+        System.out.println("1 ft == 12 inches -> " + l1.equals(l2));
+        System.out.println("1 yard == 3 feet -> " + l3.equals(l4));
+        System.out.println("30.48 cm == 1 foot -> " + l5.equals(l6));
     }
 }
